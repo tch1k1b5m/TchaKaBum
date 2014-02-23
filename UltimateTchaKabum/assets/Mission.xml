@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><missions>
+    <mission id="1">
+        <status>1</status>
+        <missionType>1</missionType>
+        <description>Estoure 10 balões vermelhos</description>
+        <singleMatch>true</singleMatch>
+        <missionKey>1</missionKey>
+        <requiredKeys>1</requiredKeys>
+     </mission>
+     <mission id="2">
+         <status>2</status>
+         <missionType>1</missionType>
+         <description>Jogue 10 partidas no clássico</description>
+         <singleMatch>true</singleMatch>
+         <missionKey>1</missionKey>
+        <requiredKeys>1</requiredKeys>
+     </mission>
+     <mission id="3">
+         <id>3</id>
+         <status>3</status>
+         <missionType>1</missionType>
+         <description>Faça combo maior que 100</description>
+         <singleMatch>false</singleMatch>
+         <missionKey>1</missionKey>
+        <requiredKeys>1</requiredKeys>
+     </mission>
+     <mission id="4">
+         <status>1</status>
+        <missionType>2</missionType>
+        <description>Estoure 50 balões verdes</description>
+        <singleMatch>false</singleMatch>
+        <missionKey>1</missionKey>
+        <requiredKeys>1</requiredKeys>
+     </mission>
+     <mission id="5">
+        <status>1</status>
+        <missionType>2</missionType>
+        <description>Estoure 50 balões azuis</description>
+        <singleMatch>false</singleMatch>
+        <missionKey>1</missionKey>
+        <requiredKeys>1</requiredKeys>
+     </mission>
+     <mission id="6">
+        <status>1</status>
+        <missionType>2</missionType>
+        <description>Estoure 50 balões amarelos</description>
+        <singleMatch>false</singleMatch>
+        <missionKey>1</missionKey>
+        <requiredKeys>1</requiredKeys>
+     </mission>
+</missions>

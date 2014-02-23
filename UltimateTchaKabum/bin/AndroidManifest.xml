@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.tchakabum.ultimatetchakabum"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk
+        android:minSdkVersion="8"
+        android:targetSdkVersion="15" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name="com.tchakabum.ultimatetchakabum.MainActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".ChallengeMode"
+            android:label="ChallengeMode" >
+        </activity>
+        <activity
+            android:name=".GeniusMode"
+            android:label="GeniusMode" >
+        </activity>
+        <activity
+            android:name=".SelectGame"
+            android:label="SelectGame" >
+        </activity>
+        <activity
+            android:name=".Ranking"
+            android:label="Ranking" >
+        </activity>
+        <activity
+            android:name=".SelectStore"
+            android:label="SelectStore" >
+        </activity>
+	<activity
+            android:name=".StoreItems"
+            android:label="StoreItems" >
+        </activity>
+        <activity
+            android:name=".StoreBalloons"
+            android:label="StoreBalloons" >
+        </activity>
+    </application>
+
+</manifest>
