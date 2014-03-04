@@ -117,7 +117,8 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 
 	// Itens
 	// -----------------------------------------------
-
+	
+	private boolean gameIsPaused = false;
 	private boolean needToPause = false;
 	private boolean doubleCombo = false;
 	private boolean dComboIsOver = false;
@@ -173,8 +174,6 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 	private BuildableBitmapTextureAtlas DoubleComboTextureAtlas;
 	private ITextureRegion burstRightTextureRegion;
 	private BuildableBitmapTextureAtlas burstRightTextureAtlas;
-	private ITextureRegion lifePowerTextureRegion;
-	private BuildableBitmapTextureAtlas lifePowerTextureAtlas;
 	private ITextureRegion freezeButtonTextureRegion;
 	private BuildableBitmapTextureAtlas freezeTextureAtlas;
 	private ITextureRegion barraTextureRegion;
@@ -216,8 +215,7 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 
 	// Game Over/Menu Scene
 	// -----------------------------------------------
-	private ITextureRegion clearBarTextureRegion;
-	private BuildableBitmapTextureAtlas clearBarTextureAtlas;
+	
 	private ITextureRegion missionBalloonTextureRegion;
 	private BuildableBitmapTextureAtlas missionBalloonTextureAtlas;
 	private ITextureRegion homeTextureRegion;
@@ -230,17 +228,23 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 	private BuildableBitmapTextureAtlas moneyTextureAtlas;
 	private ITextureRegion missionTextureRegion;
 	private BuildableBitmapTextureAtlas missionTextureAtlas;
-	private ITextureRegion pontosTextureRegion;
-	private BuildableBitmapTextureAtlas pontosTextureAtlas;
 	private BuildableBitmapTextureAtlas resumeTextureAtlas;
 	private ITextureRegion resumeTextureRegion;
-	private ButtonSprite sRestartGame;
+	private BuildableBitmapTextureAtlas gameOverTextureAtlas;
+	private ITextureRegion gameOverTextureRegion;
 	private ButtonSprite btRestart;
 	private ButtonSprite btResume;
 	private ButtonSprite btHome;
-	private Sprite scoreSprite;
+	private ButtonSprite btPause;
 	private Sprite moneySprite;
 	private Sprite missionsSprite;
+	private Sprite gameOverBackground;
+	private Text coinsPerMatch;
+	private BuildableBitmapTextureAtlas recordBalloonTextureAtlas;
+	private ITextureRegion recordBalloonITextureRegion;
+	private ButtonSprite recordBalloon;
+	private Text recordText;
+	private Text finalScoreText;
 	
 	// Shared Preferences
 	// -----------------------------------------------
@@ -333,10 +337,6 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 				this.getTextureManager(), 60, 60, TextureOptions.DEFAULT);
 		this.burstRightTextureRegion = BitmapTextureAtlasTextureRegionFactory
 				.createFromAsset(burstRightTextureAtlas, this, "Blaster.png");
-		this.lifePowerTextureAtlas = new BuildableBitmapTextureAtlas(
-				this.getTextureManager(), 58, 60, TextureOptions.DEFAULT);
-		this.lifePowerTextureRegion = BitmapTextureAtlasTextureRegionFactory
-				.createFromAsset(lifePowerTextureAtlas, this, "coracao.png");
 		this.leftCloudBlockTextureAtlas = new BitmapTextureAtlas(
 				getTextureManager(), 64, 128);
 		this.rightCloudBlockTextureAtlas = new BitmapTextureAtlas(
@@ -477,21 +477,22 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 				Math.round(383 * indResolution), TextureOptions.DEFAULT);
 		this.missionTextureRegion = BitmapTextureAtlasTextureRegionFactory
 				.createFromAsset(missionTextureAtlas, this, "MISSIONS.png");
-		this.pontosTextureAtlas = new BuildableBitmapTextureAtlas(
-				this.getTextureManager(), Math.round(369 * indResolution),
-				Math.round(137 * indResolution), TextureOptions.DEFAULT);
-		this.pontosTextureRegion = BitmapTextureAtlasTextureRegionFactory
-				.createFromAsset(pontosTextureAtlas, this, "PONTOS.png");
-		this.clearBarTextureAtlas = new BuildableBitmapTextureAtlas(
-				this.getTextureManager(), Math.round(512 * indResolution),
-				Math.round(1024 * indResolution), TextureOptions.DEFAULT);
-		this.clearBarTextureRegion = BitmapTextureAtlasTextureRegionFactory
-				.createFromAsset(clearBarTextureAtlas, this, "CAMADA2LIMPA.png");
 		this.resumeTextureAtlas = new BuildableBitmapTextureAtlas(
 				this.getTextureManager(), Math.round(64 * indResolution),
 				Math.round(64 * indResolution), TextureOptions.DEFAULT);
 		this.resumeTextureRegion = BitmapTextureAtlasTextureRegionFactory
 				.createFromAsset(resumeTextureAtlas, this, "RESUME.png");
+		this.recordBalloonTextureAtlas = new BuildableBitmapTextureAtlas(
+				this.getTextureManager(), Math.round(98 * indResolution),
+				Math.round(141 * indResolution), TextureOptions.DEFAULT);
+		this.recordBalloonITextureRegion = BitmapTextureAtlasTextureRegionFactory
+				.createFromAsset(recordBalloonTextureAtlas, this, "Record.png");
+
+		this.gameOverTextureAtlas = new BuildableBitmapTextureAtlas(
+				this.getTextureManager(), Math.round(512 * indResolution),
+				Math.round(1024 * indResolution), TextureOptions.DEFAULT);
+		this.gameOverTextureRegion = BitmapTextureAtlasTextureRegionFactory
+				.createFromAsset(gameOverTextureAtlas, this, "FundoGameOver.png");
 
 		
 		// Font
@@ -502,20 +503,16 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 				1024, 1024, TextureOptions.BILINEAR);
 
 		try {
-			this.clearBarTextureAtlas
-					.build(new BlackPawnTextureAtlasBuilder<IBitmapTextureAtlasSource, BitmapTextureAtlas>(
-							0, 1, 0));
-			this.clearBarTextureAtlas.load();
-			
-			this.pontosTextureAtlas
-			.build(new BlackPawnTextureAtlasBuilder<IBitmapTextureAtlasSource, BitmapTextureAtlas>(
-					0, 1, 0));
-			this.pontosTextureAtlas.load();
 			
 			this.resumeTextureAtlas
 			.build(new BlackPawnTextureAtlasBuilder<IBitmapTextureAtlasSource, BitmapTextureAtlas>(
 					0, 1, 0));
 			this.resumeTextureAtlas.load();
+			
+			this.gameOverTextureAtlas
+			.build(new BlackPawnTextureAtlasBuilder<IBitmapTextureAtlasSource, BitmapTextureAtlas>(
+					0, 1, 0));
+			this.gameOverTextureAtlas.load();
 			
 			this.missionTextureAtlas
 					.build(new BlackPawnTextureAtlasBuilder<IBitmapTextureAtlasSource, BitmapTextureAtlas>(
@@ -557,11 +554,6 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 							0, 1, 0));
 			this.burstRightTextureAtlas.load();
 
-			this.lifePowerTextureAtlas
-					.build(new BlackPawnTextureAtlasBuilder<IBitmapTextureAtlasSource, BitmapTextureAtlas>(
-							0, 1, 0));
-			this.lifePowerTextureAtlas.load();
-
 			this.coinTextureAtlas
 					.build(new BlackPawnTextureAtlasBuilder<IBitmapTextureAtlasSource, BitmapTextureAtlas>(
 							0, 1, 0));
@@ -587,6 +579,11 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 							0, 1, 0));
 			this.backgroundTextureAtlas.load();
 
+			this.recordBalloonTextureAtlas
+			.build(new BlackPawnTextureAtlasBuilder<IBitmapTextureAtlasSource, BitmapTextureAtlas>(
+					0, 1, 0));
+			this.recordBalloonTextureAtlas.load();
+			
 			this.lifesTextureAtlas
 					.build(new BlackPawnTextureAtlasBuilder<IBitmapTextureAtlasSource, BitmapTextureAtlas>(
 							0, 1, 0));
@@ -997,6 +994,7 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 						gmController.increaseBurstBallonCont();
 						gmController.increaseScore();
 						gmController.increaseCoins();
+						gmController.increaseCoinsPerMatch();
 						gmController.increaseCombo(
 								balloonSprite.GetBalloonColor(), doubleCombo);
 						if (gmController.getCombo() != 1)
@@ -1028,6 +1026,7 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 						gmController.increaseBurstBallonCont();
 						gmController.increaseScore();
 						gmController.increaseCoins();
+						gmController.increaseCoinsPerMatch();
 						gmController.increaseCombo(
 								balloonSprite.GetBalloonColor(), doubleCombo);
 						if (gmController.getCombo() != 1)
@@ -1057,6 +1056,7 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 						gmController.increaseBurstBallonCont();
 						gmController.increaseScore();
 						gmController.increaseCoins();
+						gmController.increaseCoinsPerMatch();
 						gmController.increaseCombo(
 								balloonSprite.GetBalloonColor(), doubleCombo);
 						if (gmController.getCombo() != 1)
@@ -1085,6 +1085,7 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 		} else if (balloonSprite.GetBalloonColor() == bType.Coin) {
 			int bonus = (int) (Math.random() * 21);
 			gmController.setCoins(gmController.getIntCoins() + bonus);
+			gmController.setCoinsPerMatch(gmController.getCoinsPerMatch() + bonus);
 			coinpopupText.setText("$" + bonus);
 			coinsPopup(balloonSprite.getX(), balloonSprite.getY());
 
@@ -1402,13 +1403,8 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 		}
 
 		bottomBar.detachSelf();
-
-		clearBottomBar = new Sprite(480, 90, clearBarTextureRegion,
-				this.getVertexBufferObjectManager());
-		clearBottomBar.setPosition(0, 0);
-
-		gameHUD.attachChild(clearBottomBar);
-
+		btPause.detachSelf();
+		
 		if (comboText.hasParent()) {
 			comboText.detachSelf();
 		}
@@ -1423,56 +1419,116 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 		comboText.setColor(0, 0, 0);
 
 		int[] scores = sPreferences.loadScorePreferences(sharedPreferences);
-		if (scores[9] < gmController.getScore()) {
-
-		} else if (scores[0] < gmController.getScore()) {
-
-		} else {
-
-		}
-		gmController.updateScore();
-
-		sPreferences.saveScorePreferences(gmController.getScoreArray(),
-				sharedPreferences);
-
+				
 		int coins = Integer.parseInt(gmController.getCoins());
 		sPreferences.saveCoinsPreferences("coins", coins, sharedPreferences);
 
+		finalScoreText = new Text(0,0, newFont, "+0", 30, new TextOptions(
+				HorizontalAlign.LEFT), this.getVertexBufferObjectManager());
+		finalScoreText.setText(Integer.toString(gmController.getScore()));
+				
 		
 
+		btHome = new ButtonSprite(Math.round(70 * indResolution),
+				(Math.round(730 * indResolution)), homeTextureRegion,
+				this.getVertexBufferObjectManager()) {
 
-		btHome.setPosition(70, btHome.getY());
-		btRestart.setPosition(160 * indResolution, btHome.getY());
-		missionsSprite = new Sprite(0,0, missionTextureRegion,
-				this.getVertexBufferObjectManager());
-		
-		missionsSprite.setPosition(CAMERA_WIDTH / 2
-				- missionsSprite.getWidth() / 2, (CAMERA_HEIGHT / 2
-				- missionsSprite.getWidth() / 2) - Math.round(62*indResolution));
-		
-		scoreSprite = new Sprite(0,0, pontosTextureRegion,
-				this.getVertexBufferObjectManager());
-		
-		scoreSprite.setPosition(CAMERA_WIDTH / 2
-				- scoreSprite.getWidth() / 2, Math.round(40 *indResolution));
-		
+			public boolean onAreaTouched(TouchEvent pTouchEvent,
+					float pTouchAreaLocalX, float pTouchAreaLocalY) {
+				startActivity(new Intent(ChallengeMode.this, MainActivity.class));
+				ChallengeMode.this.finish();
+				mScene.unregisterTouchArea(btHome);
+				return true;
+			}
+
+		};
+
+				
 		moneySprite = new Sprite(Math.round(250 * indResolution),
 				Math.round(730 * indResolution), moneyTextureRegion,
 				this.getVertexBufferObjectManager());
-
+		
+		
+		
+		gameOverBackground = new Sprite(0,0, gameOverTextureRegion,
+				this.getVertexBufferObjectManager());
+		
+		coinsPerMatch = new Text(400, 755, newFont, "0123456789", new TextOptions(
+				HorizontalAlign.LEFT), this.getVertexBufferObjectManager());
+		coinsPerMatch.setText(Integer.toString(gmController.getCoinsPerMatch()));
+		
+		coinsPerMatch.setPosition( CAMERA_WIDTH/2, 218);
+		coinsPerMatch.setColor(0,0,0);
+		
 		coinsText.setText(sPreferences.loadCoinsPreferences(sharedPreferences));
 		coinsText.setPosition(Math.round(350 * indResolution),
 				Math.round(750 * indResolution));
-
+		coinsText.setColor(0.055f, 0.45f, 0.23f);
+		
+		gameHUD.attachChild(gameOverBackground);
 		gameHUD.registerTouchArea(btRestart);
 		gameHUD.attachChild(btRestart);
 		gameHUD.registerTouchArea(btHome);
 		gameHUD.attachChild(btHome);
 		gameHUD.attachChild(moneySprite);
 		gameHUD.attachChild(coinsText);
-		gameHUD.attachChild(missionsSprite);
-		gameHUD.attachChild(scoreSprite);
+		gameHUD.attachChild(coinsPerMatch);
+		
+		
+		recordBalloon = new ButtonSprite(Math.round(50 * indResolution),
+				Math.round(30 * indResolution), recordBalloonITextureRegion,
+				this.getVertexBufferObjectManager()){
+					public boolean onAreaTouched(TouchEvent pTouchEvent,
+							float pTouchAreaLocalX, float pTouchAreaLocalY) {
+						startActivity(new Intent(ChallengeMode.this, Ranking.class));
+						ChallengeMode.this.finish();
+						mScene.unregisterTouchArea(recordBalloon);
+						return true;
+						
+					}
+				};
+		
+		recordText = new Text(Math.round(44 * indResolution) + recordBalloon.getWidth()/2,
+				Math.round(14 * indResolution) + recordBalloon.getHeight()/2, newFont, "+0", 30, new TextOptions(
+				HorizontalAlign.LEFT), this.getVertexBufferObjectManager());
+		
+		if (scores[0] < gmController.getScore()) {
+									
+			gmController.updateScore();
+			String record = gmController.getRankingPosition();
+			
+			recordText.setText(record);
+			recordText.setColor(0.996f,0.694f,0.004f);
+			
+			gameHUD.attachChild(recordBalloon);
+			gameHUD.registerTouchArea(recordBalloon);
+			if(record.equals("10"))
+				recordText.setPosition(Math.round(42 * indResolution) + recordBalloon.getWidth()/2,
+				Math.round(14 * indResolution) + recordBalloon.getHeight()/2);
+			gameHUD.attachChild(recordText);
+		}
+		
+		if(gmController.getScore() < 10){
+		finalScoreText.setPosition(CAMERA_WIDTH/2 + finalScoreText.getWidth()/2,
+				Math.round(15 * indResolution) + recordBalloon.getHeight()/2);
+		}else if(gmController.getScore() > 999){
+			finalScoreText.setPosition(CAMERA_WIDTH/2 - finalScoreText.getWidth()/4,
+					Math.round(15 * indResolution) + recordBalloon.getHeight()/2);
+		}else if(gmController.getScore() > 9999){
+			finalScoreText.setPosition(CAMERA_WIDTH/2- finalScoreText.getWidth()/5,
+					Math.round(15 * indResolution) + recordBalloon.getHeight()/2);
+		}else{
+			finalScoreText.setPosition(CAMERA_WIDTH/2- finalScoreText.getWidth()/2,
+					Math.round(15 * indResolution) + recordBalloon.getHeight()/2);
+		}
+		finalScoreText.setColor(0,0,0);
+		gameHUD.attachChild(finalScoreText);
+		
+		sPreferences.saveScorePreferences(gmController.getScoreArray(),
+				sharedPreferences);
 
+		
+		
 	}
 
 	private void removeGameOverScene() {
@@ -1492,13 +1548,15 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 				|| itemSet[2] == bType.AddLife) {
 			btLifePower.detachSelf();
 		}
-		purchasedItens = sPreferences.loadSpecialBalloonsPreferences(sharedPreferences);
+		purchasedItens = sPreferences
+				.loadSpecialBalloonsPreferences(sharedPreferences);
 		ballonController.resetBalloonController(this.mScene);
 		System.gc();
-		clearBottomBar.detachSelf();
+		
 
 		gmController.resetGame();
-
+		
+		
 		if (bottomBar.hasParent())
 			gameHUD.detachChild(bottomBar);
 		gameHUD.attachChild(bottomBar);
@@ -1513,7 +1571,10 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 		gameHUD.attachChild(life3);
 		if (scoreText.hasParent())
 			gameHUD.detachChild(scoreText);
-
+		if(recordBalloon.hasParent())
+			gameHUD.detachChild(recordBalloon);
+		if(recordText.hasParent())
+			gameHUD.detachChild(recordText);
 		gameHUD.attachChild(scoreText);
 		addPause();
 
@@ -1523,6 +1584,7 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 		dComboIsOver = false;
 		blasterOver = false;
 		lifePowerIsOver = false;
+		// createSet();
 		timerHandler.resume();
 		
 		// Detach game over scene entities
@@ -1530,9 +1592,13 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 		btHome.detachSelf();
 		moneySprite.detachSelf();
 		coinsText.detachSelf();
-		missionsSprite.detachSelf();
-		scoreSprite.detachSelf();
-		
+		gameOverBackground.detachSelf();
+		coinsPerMatch.detachSelf();
+		finalScoreText.detachSelf();
+		if(gameisOver){
+			gameisOver = false;
+			mScene.unregisterTouchArea(btRestart);
+		}
 		this.mScene.clearChildScene();
 		gameHUD.setIgnoreUpdate(false);
 	}
@@ -1542,9 +1608,13 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 		if (comboText.hasParent()) {
 			comboText.detachSelf();
 		}
-		this.newFont72 = FontFactory.createFromAsset(getFontManager(),
+		this.newFont72 = FontFactory.create(this.getFontManager(),
+				this.getTextureManager(), 512, 512,
+				Typeface.create("American Purpose Casual 01.ttf", Typeface.BOLD),
+				loadFontSize());
+		/*this.newFont72 = FontFactory.createFromAsset(getFontManager(),
 				fontTexture, getAssets(), "American Purpose Casual 01.ttf",
-				64.0f, false, Color.BLACK_ARGB_PACKED_INT);
+				72.0f, false, Color.BLACK_ARGB_PACKED_INT);*/
 		popupEstoureText = new Text(120, 250, newFont, "Estoure:",
 				new TextOptions(HorizontalAlign.LEFT),
 				this.getVertexBufferObjectManager());
@@ -1774,8 +1844,6 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 
 	}
 
-	
-
 	// -----------------------------------------------
 	// Pop-up
 	// -----------------------------------------------
@@ -1888,7 +1956,7 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 
 	private void addPause() {
 
-		final ButtonSprite btPause = new ButtonSprite(
+		btPause = new ButtonSprite(
 				Math.round(410 * indResolution),
 				(Math.round(730 * indResolution)), pauseTextureRegion,
 				this.getVertexBufferObjectManager()) {
@@ -1896,7 +1964,9 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 			public boolean onAreaTouched(TouchEvent pTouchEvent,
 					float pTouchAreaLocalX, float pTouchAreaLocalY) {
 				if (pTouchEvent.isActionUp()) {
+					if(!gameIsPaused){
 					if (!gameisOver) {
+						gameIsPaused = true;
 						gameHUD.registerTouchArea(btRestart);
 						gameHUD.attachChild(btRestart);
 						gameHUD.registerTouchArea(btHome);
@@ -1909,7 +1979,14 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 						
 						gameHUD.setIgnoreUpdate(true);
 					}
-
+					}else{
+						mScene.clearChildScene();
+						gameHUD.setIgnoreUpdate(false);
+						gameIsPaused = false;
+						btRestart.detachSelf();
+						btHome.detachSelf();
+						missionsSprite.detachSelf();
+					}
 				}
 				return true;
 			}
@@ -1942,6 +2019,7 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 	}
 
 	private MenuScene createMenuScene() {
+		
 		this.mMenuScene = new MenuScene(camera);
 		this.mMenuScene.setBackground(new Background(0, 420, 255));
 		btHome.setPosition(20*indResolution, btHome.getY());
@@ -1969,31 +2047,15 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 	}
 
 	private void restartGame(){
-		if (itemSet[0] == bType.Cloud || itemSet[1] == bType.Cloud
-				|| itemSet[2] == bType.Cloud) {
-			btBlaster.detachSelf();
-		}
-		if (itemSet[0] == bType.Combo || itemSet[1] == bType.Combo
-				|| itemSet[2] == bType.Combo) {
-			btDoubleCombo.detachSelf();
-		}
-		if (itemSet[0] == bType.Blizzard || itemSet[1] == bType.Blizzard
-				|| itemSet[2] == bType.Blizzard) {
-			btFreeze.detachSelf();
-		}
-		if (itemSet[0] == bType.AddLife || itemSet[1] == bType.AddLife
-				|| itemSet[2] == bType.AddLife) {
-			btLifePower.detachSelf();
-		}
 		purchasedItens = sPreferences.loadSpecialBalloonsPreferences(sharedPreferences);
 		ballonController.resetBalloonController(this.mScene);
 		System.gc();
 
 		gmController.resetGame();
-
-		if (bottomBar.hasParent())
+		this.gameIsPaused = false;
+		/*if (bottomBar.hasParent())
 			gameHUD.detachChild(bottomBar);
-		gameHUD.attachChild(bottomBar);
+		gameHUD.attachChild(bottomBar);*/
 		if (life1.hasParent())
 			gameHUD.detachChild(life1);
 		gameHUD.attachChild(life1);
@@ -2006,22 +2068,24 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 		if (scoreText.hasParent())
 			gameHUD.detachChild(scoreText);
 
-
 		comboText.setText("+0");
 		scoreText.setText("0");
+		gameHUD.attachChild(scoreText);
 		freezeOn = false;
 		dComboIsOver = false;
 		blasterOver = false;
 		lifePowerIsOver = false;
-		timerHandler.resume();
+		//timerHandler.resume();
+		
 		
 		// Detach game over scene entities
+		this.mScene.clearChildScene();
+		gameHUD.setIgnoreUpdate(false);		
 		btRestart.detachSelf();
 		btHome.detachSelf();
 		missionsSprite.detachSelf();
 		
-		this.mScene.clearChildScene();
-		gameHUD.setIgnoreUpdate(false);
+		
 	}
 	
 	public void initializeMenuAndGameOverComponents(){
@@ -2033,8 +2097,7 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 					float pTouchAreaLocalX, float pTouchAreaLocalY) {
 				if(gameisOver){
 					removeGameOverScene();
-					gameisOver = false;
-					mScene.unregisterTouchArea(btRestart);
+					
 				}else{
 					restartGame();
 				}
@@ -2118,7 +2181,7 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 		life1.setPosition(Math.round(263 * indResolution),
 				Math.round(757 * indResolution));
 
-		scoreText.setPosition(Math.round(333 * indResolution),
+		scoreText.setPosition(Math.round(331 * indResolution),
 				Math.round(757 * indResolution));
 		scoreText.setText("0");
 
@@ -2359,7 +2422,7 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 
 	}
 
-	private ButtonSprite addLifePowerItem(int x, int y) {
+	/*private ButtonSprite addLifePowerItem(int x, int y) {
 		final ButtonSprite btLifePower = new ButtonSprite(x, y,
 				lifePowerTextureRegion, this.getVertexBufferObjectManager()) {
 			public boolean onAreaTouched(TouchEvent pTouchEvent,
@@ -2421,7 +2484,7 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 
 		return btLifePower;
 	}
-
+*/
 	private ButtonSprite addFreezeItem(int x, int y) {
 		final ButtonSprite freezebutton = new ButtonSprite(x, y,
 				freezeButtonTextureRegion, this.getVertexBufferObjectManager()) {

@@ -2,6 +2,8 @@ package Controller;
 
 import java.util.Arrays;
 
+import org.andengine.opengl.shader.PositionColorShaderProgram;
+
 public class ChallengeGameController {
 
 	private int lvlChangeScore = 100;
@@ -12,6 +14,7 @@ public class ChallengeGameController {
 	private int combo = 0;
 	private int burstBalloonCont = 0;
 	private int coins;
+	private int coinsPerMatch = 0;
 	private int[] scoreArray = new int[10];
 	private int previousColorBurst = 0;
 
@@ -70,6 +73,7 @@ public class ChallengeGameController {
 		score = 0;
 		combo = 0;
 		burstBalloonCont = 0;
+		coinsPerMatch = 0;
 	}
 
 	public void increaseBurstBallonCont() {
@@ -135,7 +139,7 @@ public class ChallengeGameController {
 	public int getCombo() {
 		return combo;
 	}
-
+	
 	public void setLvlChangeScore(int lvlChangeScore) {
 		this.lvlChangeScore = lvlChangeScore;
 	}
@@ -184,7 +188,19 @@ public class ChallengeGameController {
 	public void setCoins(int coins) {
 		this.coins = coins;
 	}
+	
+	public int getCoinsPerMatch(){
+		return coinsPerMatch;
+	}
+	
+	public void setCoinsPerMatch(int coins) {
+		this.coinsPerMatch = coins;
+	}
 
+	public int increaseCoinsPerMatch(){
+		this.coinsPerMatch +=1;
+		return coinsPerMatch;
+	}
 	public String increaseCoins() {
 		this.coins += 1;
 		String coinsString = "" + this.coins;
@@ -198,6 +214,19 @@ public class ChallengeGameController {
 			Arrays.sort(scoreArray);
 		}
 
+	}
+	
+	public String getRankingPosition(){
+		String position = null;
+		int pos = 10;
+		for(int i = 0; i<scoreArray.length; i++){
+			if(scoreArray[i] == score){
+				position = Integer.toString(pos);	
+			}
+			pos--;
+			
+		}
+		return position;
 	}
 	
 }
