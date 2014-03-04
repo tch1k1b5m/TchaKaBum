@@ -146,6 +146,7 @@ public class MissionController {
 			} else if(mList.get(cont).getId() == ((missionPackage * 3)-2)){
 				missions[0] = mList.get(cont);
 			}
+		}
 
 	}
 
