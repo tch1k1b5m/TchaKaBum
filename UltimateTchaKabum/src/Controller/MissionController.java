@@ -147,8 +147,6 @@ public class MissionController {
 				missions[0] = mList.get(cont);
 			}
 		}
-		//asdas
-
 	}
 
 }
