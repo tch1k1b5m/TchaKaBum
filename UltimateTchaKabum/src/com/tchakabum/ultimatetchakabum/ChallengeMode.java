@@ -18,6 +18,7 @@ import org.andengine.entity.modifier.AlphaModifier;
 import org.andengine.entity.modifier.DelayModifier;
 import org.andengine.entity.modifier.IEntityModifier.IEntityModifierListener;
 import org.andengine.entity.modifier.MoveModifier;
+import org.andengine.entity.modifier.ScaleModifier;
 import org.andengine.entity.scene.IOnAreaTouchListener;
 import org.andengine.entity.scene.IOnSceneTouchListener;
 import org.andengine.entity.scene.ITouchArea;
@@ -67,6 +68,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
+import android.view.animation.ScaleAnimation;
 
 public class ChallengeMode extends SimpleBaseGameActivity implements
 		IOnSceneTouchListener, IOnAreaTouchListener, ITimerCallback,
@@ -274,7 +276,12 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 	// -----------------------------------------------
 	private ArrayList<Integer> aquiredMKeys = new ArrayList<Integer>();
 	private MissionKeys MKeys = new MissionKeys();
-
+	private Mission[] missions;
+	private Text m1Text;
+	private Text m2Text;
+	private Text m3Text;
+	
+	
 	// -----------------------------------------------
 	// Base Game Methods
 	// -----------------------------------------------
@@ -632,11 +639,6 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 		initMenuBallons();
 		// createSet();
 
-		/*
-		 * btDoubleCombo = addDoubleComboItem(90, 740);
-		 * gameHUD.registerTouchArea(btDoubleCombo);
-		 * gameHUD.attachChild(btDoubleCombo);
-		 */
 
 		if (sPreferences.loadScorePreferences(sharedPreferences).length == 0
 				|| sPreferences.loadScorePreferences(sharedPreferences) == null) {
@@ -656,6 +658,11 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 		}
 		mScene.registerUpdateHandler(timerHandler);
 		this.mScene.setOnAreaTouchListener(this);
+		
+		// Init missions
+		initMissions();
+		initMissionText();
+		
 		return this.mScene;
 	}
 
@@ -1383,21 +1390,7 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 	// -----------------------------------------------
 
 	private void createGameOverScene() {
-		InputStream is = null;
-		int pack = sPreferences.loadPackagePreferences(sharedPreferences);
-		// System.out.println(pack);
-		try {
-			is = this.getAssets().open("Mission.xml");
-		} catch (IOException e) {
-			Log.d("XML", "error creating input");
-		}
-		// arrumar
-		/*
-		 * Mission[] missions = saxParser.getMissions(is, pack); for(int i=0;
-		 * i<missions.length; i++){
-		 * System.out.println("Mission id"+missions[i].getId
-		 * ()+" Mission description:"+missions[i].getDescription()); }
-		 */
+		
 		for (Integer i : purchasedItens) {
 			System.out.println("ITENS COMPRADOS: " + i);
 		}
@@ -1428,22 +1421,10 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 		finalScoreText.setText(Integer.toString(gmController.getScore()));
 				
 		
-
-		btHome = new ButtonSprite(Math.round(70 * indResolution),
-				(Math.round(730 * indResolution)), homeTextureRegion,
-				this.getVertexBufferObjectManager()) {
-
-			public boolean onAreaTouched(TouchEvent pTouchEvent,
-					float pTouchAreaLocalX, float pTouchAreaLocalY) {
-				startActivity(new Intent(ChallengeMode.this, MainActivity.class));
-				ChallengeMode.this.finish();
-				mScene.unregisterTouchArea(btHome);
-				return true;
-			}
-
-		};
-
-				
+		
+		
+		btRestart.setPosition((110 * indResolution), (Math.round(730 * indResolution)));
+		btHome.setPosition((20 * indResolution), (Math.round(730 * indResolution)));
 		moneySprite = new Sprite(Math.round(250 * indResolution),
 				Math.round(730 * indResolution), moneyTextureRegion,
 				this.getVertexBufferObjectManager());
@@ -1473,6 +1454,9 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 		gameHUD.attachChild(moneySprite);
 		gameHUD.attachChild(coinsText);
 		gameHUD.attachChild(coinsPerMatch);
+		gameHUD.attachChild(m1Text);
+		gameHUD.attachChild(m2Text);
+		gameHUD.attachChild(m3Text);
 		
 		
 		recordBalloon = new ButtonSprite(Math.round(50 * indResolution),
@@ -1505,7 +1489,22 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 			if(record.equals("10"))
 				recordText.setPosition(Math.round(42 * indResolution) + recordBalloon.getWidth()/2,
 				Math.round(14 * indResolution) + recordBalloon.getHeight()/2);
-			gameHUD.attachChild(recordText);
+		
+			final ScaleModifier scale = new ScaleModifier(0.4f, 4.0f, 1.0f);
+			gameHUD.registerEntityModifier(new DelayModifier(1, new IEntityModifierListener() {
+				
+				@Override
+				public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
+					
+				}
+				
+				@Override
+				public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+					gameHUD.attachChild(recordText);
+					recordText.registerEntityModifier(scale);
+					gameHUD.clearEntityModifiers();
+				}
+			}));
 		}
 		
 		if(gmController.getScore() < 10){
@@ -1576,7 +1575,7 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 		if(recordText.hasParent())
 			gameHUD.detachChild(recordText);
 		gameHUD.attachChild(scoreText);
-		addPause();
+		addPauseButton();
 
 		comboText.setText("+0");
 		scoreText.setText("0");
@@ -1844,6 +1843,16 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 
 	}
 
+	private float loadResolutionX() {
+		float value = 1.6f;
+		return value;
+	}
+
+	private float loadFontSize() {
+		float value = 72.0f;
+		return value;
+	}
+	
 	// -----------------------------------------------
 	// Pop-up
 	// -----------------------------------------------
@@ -1936,16 +1945,8 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 		if (gameisOver) {
 			startActivity(new Intent(ChallengeMode.this, MainActivity.class));
 			ChallengeMode.this.finish();
-		} else if (!mScene.hasChildScene()) {
-			gameHUD.registerTouchArea(btRestart);
-			gameHUD.attachChild(btRestart);
-			gameHUD.registerTouchArea(btHome);
-			gameHUD.attachChild(btHome);
-			gameHUD.attachChild(missionsSprite);
-			MenuScene menuScene = createMenuScene();
-			mScene.setChildScene(menuScene, false, true, true);
-			menuScene.buildAnimations();
-			menuScene.setBackgroundEnabled(false);
+		} else  {
+			pause();
 		}
 
 	}
@@ -1954,7 +1955,7 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 	// Menu Pause
 	// -----------------------------------------------
 
-	private void addPause() {
+	private void addPauseButton() {
 
 		btPause = new ButtonSprite(
 				Math.round(410 * indResolution),
@@ -1964,29 +1965,7 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 			public boolean onAreaTouched(TouchEvent pTouchEvent,
 					float pTouchAreaLocalX, float pTouchAreaLocalY) {
 				if (pTouchEvent.isActionUp()) {
-					if(!gameIsPaused){
-					if (!gameisOver) {
-						gameIsPaused = true;
-						gameHUD.registerTouchArea(btRestart);
-						gameHUD.attachChild(btRestart);
-						gameHUD.registerTouchArea(btHome);
-						gameHUD.attachChild(btHome);
-						gameHUD.attachChild(missionsSprite);
-						MenuScene menuScene = createMenuScene();
-						mScene.setChildScene(menuScene, false, true, true);
-						menuScene.buildAnimations();
-						menuScene.setBackgroundEnabled(false);
-						
-						gameHUD.setIgnoreUpdate(true);
-					}
-					}else{
-						mScene.clearChildScene();
-						gameHUD.setIgnoreUpdate(false);
-						gameIsPaused = false;
-						btRestart.detachSelf();
-						btHome.detachSelf();
-						missionsSprite.detachSelf();
-					}
+					pause();
 				}
 				return true;
 			}
@@ -2083,6 +2062,9 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 		gameHUD.setIgnoreUpdate(false);		
 		btRestart.detachSelf();
 		btHome.detachSelf();
+		m1Text.detachSelf();
+		m2Text.detachSelf();
+		m3Text.detachSelf();
 		missionsSprite.detachSelf();
 		
 		
@@ -2129,6 +2111,38 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 		
 	}
 
+	private void pause() {
+			if (!gameIsPaused) {
+				if (!gameisOver) {
+					gameIsPaused = true;
+					gameHUD.registerTouchArea(btRestart);
+					gameHUD.attachChild(btRestart);
+					gameHUD.registerTouchArea(btHome);
+					gameHUD.attachChild(btHome);
+					gameHUD.attachChild(missionsSprite);
+					gameHUD.attachChild(m1Text);
+					gameHUD.attachChild(m2Text);
+					gameHUD.attachChild(m3Text);
+					MenuScene menuScene = createMenuScene();
+					mScene.setChildScene(menuScene, false, true, true);
+					menuScene.buildAnimations();
+					menuScene.setBackgroundEnabled(false);
+					gameHUD.setIgnoreUpdate(true);
+				}
+			} else {
+				mScene.clearChildScene();
+				gameHUD.setIgnoreUpdate(false);
+				gameIsPaused = false;
+				btRestart.detachSelf();
+				btHome.detachSelf();
+				m1Text.detachSelf();
+				m2Text.detachSelf();
+				m3Text.detachSelf();
+				missionsSprite.detachSelf();
+			}
+
+	}
+	
 	// -----------------------------------------------
 	// HUD
 	// -----------------------------------------------
@@ -2142,7 +2156,7 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 		this.font.load();
 		this.newFont = FontFactory.createFromAsset(getFontManager(),
 				fontTexture, getAssets(), "American Purpose Casual 01.ttf",
-				48.0f, true, Color.WHITE_ARGB_PACKED_INT);
+				48.0f, true, Color.BLACK_ABGR_PACKED_INT);
 		this.newFont.load();
 		this.fontSize64 = FontFactory.create(this.getFontManager(),
 				this.getTextureManager(), 256, 256,
@@ -2195,7 +2209,7 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 		gameHUD.attachChild(life2);
 		gameHUD.attachChild(life3);
 
-		addPause();
+		addPauseButton();
 		camera.setHUD(gameHUD);
 
 	}
@@ -2678,15 +2692,49 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 
 	}
 
-	// Resolution
-	private float loadResolutionX() {
-		float value = 1.6f;
-		return value;
+	// -----------------------------------------------
+	// Missions
+	// -----------------------------------------------
+	
+	public void initMissions() {
+		InputStream is = null;
+		int pack = sPreferences.loadPackagePreferences(sharedPreferences);
+		try {
+			is = this.getAssets().open("Mission.xml");
+		} catch (IOException e) {
+			Log.d("XML", "error creating input");
+		}
+		missions = saxParser.getMissions(is, pack);
+	}
+	
+	public void initMissionText(){
+		mDescripionFormatter();
+		m1Text = new Text(20, 420, newFont, "x0", 30, new TextOptions(
+				HorizontalAlign.LEFT), this.getVertexBufferObjectManager());
+		m2Text = new Text(20, 420, newFont, "x0", 30, new TextOptions(
+				HorizontalAlign.LEFT), this.getVertexBufferObjectManager());
+		m3Text = new Text(20, 420, newFont, "x0", 30, new TextOptions(
+				HorizontalAlign.LEFT), this.getVertexBufferObjectManager());
+		m1Text.setText(missions[0].getDescription());
+		m2Text.setText(missions[1].getDescription());
+		m3Text.setText(missions[2].getDescription());
+		/*m1Text.setPosition((CAMERA_WIDTH/2) -(m1Text.getWidth()/2), 500);
+		m2Text.setPosition((CAMERA_WIDTH/2) -(m2Text.getWidth()/2), 625);
+		m3Text.setPosition((CAMERA_WIDTH/2) -(m3Text.getWidth()/2), 750);*/
+		m1Text.setPosition(181, 500);
+		m2Text.setPosition(181, 625);
+		m3Text.setPosition(181, 750);
+		System.out.println(m3Text.getX());
+		
 	}
 
-	private float loadFontSize() {
-		float value = 72.0f;
-		return value;
+	public void mDescripionFormatter(){
+		String aux = missions[0].getDescription().substring(0, 18) + "\n"+missions[0].getDescription().substring(18, missions[0].getDescription().length());
+		missions[0].setDescription(aux);
+		aux = missions[1].getDescription().substring(0, 18) + "\n"+missions[1].getDescription().substring(18, missions[1].getDescription().length());
+		missions[1].setDescription(aux);
+		aux = missions[2].getDescription().substring(0, 18) + "\n"+missions[2].getDescription().substring(18, missions[2].getDescription().length());
+		missions[2].setDescription(aux);
 	}
 
 }

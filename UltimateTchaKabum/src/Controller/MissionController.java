@@ -5,17 +5,18 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 
+
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 import Model.Mission;
 import Model.MissionKeys;
-import SAX.MissionHandler;
+import SAX.*;
 import SharedPreferences.SharedPreferencesController;
 
 public class MissionController {
 
-	private MissionHandler missionHandler = new MissionHandler();
+	private SAXParser saxParser = new SAXParser();
 	
 	private Mission[] missions = new Mission[3];
 	private MissionKeys MKeys = new MissionKeys();
@@ -32,7 +33,7 @@ public class MissionController {
 	private String[] missionsStatus;
 	private int missionPackage;
 
-	public MissionController(ArrayList<Integer> missionKeys, int level, int score, int combo, int gold, int missionPackage, String[] missionStatus) {
+	public MissionController(ArrayList<Integer> missionKeys, int level, int score, int combo, int gold, Mission[] missions, String[] missionStatus) {
 		this.missionPackage = missionPackage;
 		this.missionsStatus = missionStatus;
 		this.level = level;
@@ -40,11 +41,11 @@ public class MissionController {
 		this.combo = combo;
 		this.score = score;
 		this.missionKeys = missionKeys;
-		LoadMissions();
+		this.missions = missions;
 	}
 
 	public MissionController(ArrayList<Integer> missionKeys, int level) {
-		LoadMissions();
+		
 		this.missionKeys = missionKeys;
 	}
 
@@ -133,20 +134,6 @@ public class MissionController {
 		return strKeys;
 	}
 
-	public void LoadMissions() {
-		
-		
-		ArrayList<Mission> mList = missionHandler.getMissions();
-		int size = mList.size();
-		for(int cont = 0; cont < size; cont++){
-			if(mList.get(cont).getId() == (missionPackage * 3)){
-				missions[2] = mList.get(cont);
-			} else if(mList.get(cont).getId() == ((missionPackage * 3)-1)){
-				missions[1] = mList.get(cont);
-			} else if(mList.get(cont).getId() == ((missionPackage * 3)-2)){
-				missions[0] = mList.get(cont);
-			}
-		}
-	}
+	
 	
 }
