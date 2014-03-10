@@ -1,3 +1,9 @@
 
 /com
+/.gitignore
+/Accelerometer
 /Controller
+/Extension
+/Model
+/SAX
+/SharedPreferences

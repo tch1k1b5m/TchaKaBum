@@ -1,28 +1,28 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><missions>
+﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?><missions>
     <mission id="1">
         <status>1</status>
         <missionType>1</missionType>
-        <description>Estoure 10 balões vermelhos</description>
+        <description>Pop 10 red balloons</description>
         <singleMatch>true</singleMatch>
         <missionKey>1</missionKey>
-        <requiredKeys>1</requiredKeys>
+        <requiredKeys>10</requiredKeys>
      </mission>
      <mission id="2">
          <status>2</status>
          <missionType>1</missionType>
-         <description>Jogue 10 partidas no clássico</description>
+         <description>Play 10 Challenge Mode matches</description>
          <singleMatch>true</singleMatch>
          <missionKey>1</missionKey>
-        <requiredKeys>1</requiredKeys>
+        <requiredKeys>50</requiredKeys>
      </mission>
      <mission id="3">
          <id>3</id>
          <status>3</status>
          <missionType>1</missionType>
-         <description>Faça combo maior que 100</description>
+         <description>Combo bigger than 100</description>
          <singleMatch>false</singleMatch>
          <missionKey>1</missionKey>
-        <requiredKeys>1</requiredKeys>
+        <requiredKeys>20</requiredKeys>
      </mission>
      <mission id="4">
          <status>1</status>

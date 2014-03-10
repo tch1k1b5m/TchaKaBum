@@ -36,6 +36,7 @@ import org.andengine.entity.text.TextOptions;
 import org.andengine.input.touch.TouchEvent;
 import org.andengine.opengl.font.Font;
 import org.andengine.opengl.font.FontFactory;
+import org.andengine.opengl.font.StrokeFont;
 import org.andengine.opengl.texture.ITexture;
 import org.andengine.opengl.texture.TextureOptions;
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
@@ -183,7 +184,7 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 	private Text coinsText;
 	private Text comboText;
 	private Text coinpopupText;
-	private Text popupEstoureText;
+	private Text levelText;
 	private HUD gameHUD;
 	private Text scoreText;
 	private Font font;
@@ -277,9 +278,17 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 	private ArrayList<Integer> aquiredMKeys = new ArrayList<Integer>();
 	private MissionKeys MKeys = new MissionKeys();
 	private Mission[] missions;
+	private int missionPack;
+	private String[] missionsStatus;
 	private Text m1Text;
 	private Text m2Text;
 	private Text m3Text;
+	private Text m1StatusText;
+	private Text m2StatusText;
+	private Text m3StatusText;
+	private Text packText;
+	private Font packTextFont;
+	private Font missionStatusFont;
 	
 	
 	// -----------------------------------------------
@@ -1457,7 +1466,10 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 		gameHUD.attachChild(m1Text);
 		gameHUD.attachChild(m2Text);
 		gameHUD.attachChild(m3Text);
-		
+		/*gameHUD.attachChild(m1StatusText);
+		gameHUD.attachChild(m2StatusText);
+		gameHUD.attachChild(m3StatusText);*/
+		gameHUD.attachChild(packText);
 		
 		recordBalloon = new ButtonSprite(Math.round(50 * indResolution),
 				Math.round(30 * indResolution), recordBalloonITextureRegion,
@@ -1489,9 +1501,9 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 			if(record.equals("10"))
 				recordText.setPosition(Math.round(42 * indResolution) + recordBalloon.getWidth()/2,
 				Math.round(14 * indResolution) + recordBalloon.getHeight()/2);
-		
+			
 			final ScaleModifier scale = new ScaleModifier(0.4f, 4.0f, 1.0f);
-			gameHUD.registerEntityModifier(new DelayModifier(1, new IEntityModifierListener() {
+			DelayModifier dMod = new DelayModifier(1, new IEntityModifierListener() {
 				
 				@Override
 				public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
@@ -1500,11 +1512,16 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 				
 				@Override
 				public void onModifierFinished(IModifier<IEntity> pModifier, IEntity pItem) {
+					
+					if(recordText.hasParent())
+						recordText.detachSelf();
 					gameHUD.attachChild(recordText);
+					recordText.clearEntityModifiers();
 					recordText.registerEntityModifier(scale);
-					gameHUD.clearEntityModifiers();
 				}
-			}));
+			});
+			dMod.setAutoUnregisterWhenFinished(true);
+			gameHUD.registerEntityModifier(dMod);
 		}
 		
 		if(gmController.getScore() < 10){
@@ -1603,7 +1620,7 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 	}
 
 	private void popupScene() {
-		System.out.println("POP UP ATIVADOS");
+		
 		if (comboText.hasParent()) {
 			comboText.detachSelf();
 		}
@@ -1614,15 +1631,19 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 		/*this.newFont72 = FontFactory.createFromAsset(getFontManager(),
 				fontTexture, getAssets(), "American Purpose Casual 01.ttf",
 				72.0f, false, Color.BLACK_ARGB_PACKED_INT);*/
-		popupEstoureText = new Text(120, 250, newFont, "Estoure:",
-				new TextOptions(HorizontalAlign.LEFT),
+		final ITexture levelFontTexture = new BitmapTextureAtlas(this.getTextureManager(), 512, 512, TextureOptions.BILINEAR);
+		levelFontTexture.load();
+		//Font levelTextFont = FontFactory.createFromAsset(getFontManager(), levelFontTexture, getAssets(), "American Purpose Casual 01.ttf", 122.0f, true, Color.WHITE_ABGR_PACKED_INT);
+		Font strokeLevelTextFont = FontFactory.createStrokeFromAsset(getFontManager(), levelFontTexture, getAssets(), "American Purpose Casual 01.ttf", 124.0f, false, Color.WHITE_ARGB_PACKED_INT, 3, Color.BLACK_ABGR_PACKED_INT);
+				
+		//levelTextFont.load();
+		strokeLevelTextFont.load();
+		levelText = new Text(120, 250, strokeLevelTextFont, "Estoure:",
+				new TextOptions(HorizontalAlign.CENTER),
 				this.getVertexBufferObjectManager());
-		popupEstoureText.setColor(0, 0, 0);
-		popupEstoureText.setPosition(
-				CAMERA_WIDTH / 2 - (popupEstoureText.getWidth() / 2),
-				(CAMERA_HEIGHT / 2 - (popupEstoureText.getHeight() / 2) - 150));
-		popupEstoureText.setText("Level " + gmController.getLvl() + ":");
-		gameHUD.attachChild(popupEstoureText);
+		levelText.setPosition(140*indResolution, (CAMERA_HEIGHT / 2 - (levelText.getHeight() / 2) - 190));
+		levelText.setText("Level " + gmController.getLvl() + ":");
+		gameHUD.attachChild(levelText);
 		ballonController.generateMenuBallonsList();
 
 		if (ballonController.getRightColorsCont() == 1) {
@@ -1653,7 +1674,7 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 	}
 
 	private void removePopupScene() {
-		this.gameHUD.detachChild(popupEstoureText);
+		this.gameHUD.detachChild(levelText);
 
 		this.gameHUD.detachChild(ballonController.getBallonsMenu()[0]);
 		if (ballonController.getRightColorsCont() >= 2) {
@@ -2065,7 +2086,11 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 		m1Text.detachSelf();
 		m2Text.detachSelf();
 		m3Text.detachSelf();
+		/*m1StatusText.detachSelf();
+		m2StatusText.detachSelf();
+		m3StatusText.detachSelf();*/
 		missionsSprite.detachSelf();
+		packText.detachSelf();
 		
 		
 	}
@@ -2123,6 +2148,10 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 					gameHUD.attachChild(m1Text);
 					gameHUD.attachChild(m2Text);
 					gameHUD.attachChild(m3Text);
+					/*gameHUD.attachChild(m1StatusText);
+					gameHUD.attachChild(m2StatusText);
+					gameHUD.attachChild(m3StatusText);*/
+					gameHUD.attachChild(packText);
 					MenuScene menuScene = createMenuScene();
 					mScene.setChildScene(menuScene, false, true, true);
 					menuScene.buildAnimations();
@@ -2138,6 +2167,7 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 				m1Text.detachSelf();
 				m2Text.detachSelf();
 				m3Text.detachSelf();
+				packText.detachSelf();
 				missionsSprite.detachSelf();
 			}
 
@@ -2653,8 +2683,8 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 
 	public void addColorReminder() {
 		colorreminderUsed = true;
-		popupEstoureText.setText("Level " + gmController.getLvl() + ":");
-		gameHUD.attachChild(popupEstoureText);
+		levelText.setText("Level " + gmController.getLvl() + ":");
+		gameHUD.attachChild(levelText);
 		clearAllBallons();
 
 		if (ballonController.getRightColorsCont() == 1) {
@@ -2698,33 +2728,67 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 	
 	public void initMissions() {
 		InputStream is = null;
-		int pack = sPreferences.loadPackagePreferences(sharedPreferences);
+		missionPack = sPreferences.loadPackagePreferences(sharedPreferences);
 		try {
 			is = this.getAssets().open("Mission.xml");
 		} catch (IOException e) {
 			Log.d("XML", "error creating input");
 		}
-		missions = saxParser.getMissions(is, pack);
+		missions = saxParser.getMissions(is, missionPack);
+		missionsStatus = sPreferences.loadMissionStatusPreferences(sharedPreferences);
+		if(missionsStatus[0] == null || missionsStatus[0].isEmpty()){
+			String[] stdValues = {"0","0","0"};
+			sPreferences.saveMissionStatusPreferences(stdValues, sharedPreferences);
+		}
+			
 	}
 	
 	public void initMissionText(){
 		mDescripionFormatter();
-		m1Text = new Text(20, 420, newFont, "x0", 30, new TextOptions(
+		// Initialize Fonts
+		final ITexture packTextFontTexture = new BitmapTextureAtlas(this.getTextureManager(), 256, 256, TextureOptions.BILINEAR);
+		packTextFont = FontFactory.createFromAsset(getFontManager(),
+				packTextFontTexture, getAssets(), "American Purpose Casual 01.ttf",
+				122.0f, true, Color.WHITE_ABGR_PACKED_INT);
+		packTextFont.load();
+		missionStatusFont = FontFactory.createFromAsset(getFontManager(),
+				fontTexture, getAssets(), "American Purpose Casual 01.ttf",
+				22.0f, true, (Color.RED_ABGR_PACKED_INT + android.graphics.Color.argb(1, 245, 199, 73)));
+		missionStatusFont.load();
+		// Initialize text font
+		m1Text = new Text(20, 420, newFont, "", 30, new TextOptions(
 				HorizontalAlign.LEFT), this.getVertexBufferObjectManager());
-		m2Text = new Text(20, 420, newFont, "x0", 30, new TextOptions(
+		m2Text = new Text(20, 420, newFont, "", 30, new TextOptions(
 				HorizontalAlign.LEFT), this.getVertexBufferObjectManager());
-		m3Text = new Text(20, 420, newFont, "x0", 30, new TextOptions(
+		m3Text = new Text(20, 420, newFont, "", 30, new TextOptions(
 				HorizontalAlign.LEFT), this.getVertexBufferObjectManager());
+		m1StatusText = new Text(20, 420, newFont, "", 30, new TextOptions(
+				HorizontalAlign.LEFT), this.getVertexBufferObjectManager());
+		m2StatusText = new Text(20, 420, newFont, "", 30, new TextOptions(
+				HorizontalAlign.LEFT), this.getVertexBufferObjectManager());
+		m3StatusText = new Text(20, 420, newFont, "", 30, new TextOptions(
+				HorizontalAlign.LEFT), this.getVertexBufferObjectManager());
+		packText = new Text(20, 420, packTextFont, "", 30, new TextOptions(
+				HorizontalAlign.LEFT), this.getVertexBufferObjectManager());
+		//packText.setScale(3.0f);
+		
+		// Set text
 		m1Text.setText(missions[0].getDescription());
 		m2Text.setText(missions[1].getDescription());
 		m3Text.setText(missions[2].getDescription());
-		/*m1Text.setPosition((CAMERA_WIDTH/2) -(m1Text.getWidth()/2), 500);
-		m2Text.setPosition((CAMERA_WIDTH/2) -(m2Text.getWidth()/2), 625);
-		m3Text.setPosition((CAMERA_WIDTH/2) -(m3Text.getWidth()/2), 750);*/
+		m1StatusText.setText(missionsStatus[0]+"/"+missions[0].getSingleRequiredKeys());
+		m2StatusText.setText(missionsStatus[1]+"/"+missions[1].getSingleRequiredKeys());
+		m3StatusText.setText(missionsStatus[2]+"/"+missions[2].getSingleRequiredKeys());
+		packText.setText(String.valueOf(missionPack));
+		
+		// Define position
 		m1Text.setPosition(181, 500);
 		m2Text.setPosition(181, 625);
 		m3Text.setPosition(181, 750);
-		System.out.println(m3Text.getX());
+		m1StatusText.setPosition(181, 600);
+		m2StatusText.setPosition(181, 725);
+		m3StatusText.setPosition(181, 850);
+		packText.setPosition(180, 345);
 		
 	}
 
