@@ -1641,7 +1641,7 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 		levelText = new Text(120, 250, strokeLevelTextFont, "Estoure:",
 				new TextOptions(HorizontalAlign.CENTER),
 				this.getVertexBufferObjectManager());
-		levelText.setPosition(140*indResolution, (CAMERA_HEIGHT / 2 - (levelText.getHeight() / 2) - 190));
+		levelText.setPosition(130*indResolution, (CAMERA_HEIGHT / 2 - (levelText.getHeight() / 2) - 190));
 		levelText.setText("Level " + gmController.getLvl() + ":");
 		gameHUD.attachChild(levelText);
 		ballonController.generateMenuBallonsList();
@@ -1672,7 +1672,7 @@ public class ChallengeMode extends SimpleBaseGameActivity implements
 			this.gameHUD.attachChild(ballonController.getBallonsMenu()[2]);
 		}
 	}
-
+ 
 	private void removePopupScene() {
 		this.gameHUD.detachChild(levelText);
 
